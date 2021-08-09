@@ -25,9 +25,11 @@ async fn main() {
 
                 let mut accounts = HashMap::new();
 
-
-                while let Some(transaction) = rx.recv().await {
-                    transaction_manager::process_transaction(&mut accounts, &transaction).await;
+                while let Some(message) = rx.recv().await {
+                    let result = transaction_manager::process_transaction(&mut accounts, &message.transaction).await;
+                    if let Err(err )= message.sender.send(result) {
+                        eprintln!("Cannot send the transaction process result to the client! : {:?}", err);
+                    }
                 }
 
                 let mut serializer = AsyncWriterBuilder::new()
@@ -35,7 +37,9 @@ async fn main() {
                     .create_serializer(io::stdout());
 
                 for account in accounts {
-                    serializer.serialize(account.1).await;
+                    if serializer.serialize(account.1).await.is_err(){
+                        eprintln!("Unable to deserialize record.");
+                    }
                 }
             },
             Err(err) => {eprintln!("Cannot open input file {:?}", err); }
