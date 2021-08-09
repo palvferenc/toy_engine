@@ -3,6 +3,7 @@ use tokio::io::AsyncRead;
 use csv_async::{AsyncReaderBuilder, Trim};
 use futures::stream::StreamExt;
 use tokio::fs::File;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -19,13 +20,13 @@ pub enum TransactionType{
 #[derive(Deserialize, Debug)]
 pub struct Transaction {
     #[serde(alias = "type")]
-    trans_type: TransactionType,
-    client: u64,
-    tx: u64,
-    amount: f32
+    pub trans_type: TransactionType,
+    pub client: u64,
+    pub tx: u64,
+    pub amount: f32
 }
 
-async fn deserialize_csv(tx: tokio::sync::mpsc::Sender<Transaction>, reader: impl AsyncRead + Unpin + Send + Sync)
+pub async fn deserialize_csv(tx: tokio::sync::mpsc::Sender<Transaction>, reader: impl AsyncRead + Unpin + Send + Sync)
 {
     let mut deserializer = AsyncReaderBuilder::new()
         .trim(Trim::All)
