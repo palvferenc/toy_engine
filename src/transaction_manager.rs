@@ -6,6 +6,7 @@ use std::fmt::{Debug};
 
 #[derive(Serialize, Debug)]
 pub struct Account {
+    #[serde(rename = "client")]
     id: u64,
     available: f32,
     held: f32,
