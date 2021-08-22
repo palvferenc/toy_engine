@@ -8,10 +8,6 @@ use std::collections::HashMap;
 mod csv_parser;
 mod transaction_manager;
 
-#[macro_use]
-extern crate matches;
-
-
 #[tokio::main]
 async fn main() {
     if let Some(input_file) = env::args().collect::<Vec<String>>().get(1) {
