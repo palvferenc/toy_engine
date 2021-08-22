@@ -44,6 +44,7 @@ pub enum TransactionError {
     InvalidReferencedTransaction,
     ReferencedTransactionIsNotDisputed,
     NoAmountForTransaction,
+    ExistingTransactionId,
 }
 
 impl Display for TransactionError {
@@ -53,6 +54,7 @@ impl Display for TransactionError {
             TransactionError::InvalidReferencedTransaction => {write!(f, "Cannot find the transaction based on tx id")}
             TransactionError::ReferencedTransactionIsNotDisputed => {write!(f, "Referenced transaction not under dispute")}
             TransactionError::NoAmountForTransaction => {write!(f, "Invalid transaction, it doesn't have amount")}
+            TransactionError::ExistingTransactionId => {write!(f, "Transaction id is already exists")}
         }
     }
 }

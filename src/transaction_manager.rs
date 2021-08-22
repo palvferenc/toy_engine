@@ -31,10 +31,25 @@ impl Account {
 }
 
 pub async fn process_transaction(accounts: &mut HashMap<u16, Account>, transaction: &Transaction) -> Result<(), TransactionError> {
-
+    if !valid_transaction_id(accounts, transaction).await {
+        return Err(TransactionError::ExistingTransactionId)
+    }
     let account = accounts.entry(transaction.client).or_insert_with(||Account::new(transaction.client));
+    manage_transaction(account, transaction).await
+}
 
-    manage_transaction(account,transaction).await
+async fn valid_transaction_id(accounts: &mut HashMap<u16, Account>, transaction: &Transaction) -> bool {
+    match transaction.trans_type {
+        TransactionType::Deposit | TransactionType::WithDrawal => {
+            for account in accounts.values() {
+                if account.transactions.contains_key(&transaction.tx) {
+                    return false
+                }
+            }
+            true
+        }
+        _ => { true }
+    }
 }
 
 async fn manage_transaction(account: &mut Account, transaction: &Transaction) -> Result<(), TransactionError> {
@@ -145,6 +160,8 @@ mod tests {
         assert_eq!(account.available, 1.0);
         assert_eq!(account.total, 1.0);
     }
+
+
 
     #[tokio::test]
     async fn test_transaction_deposit_error_no_amount(){
@@ -436,6 +453,40 @@ mod tests {
         };
 
         assert_matches!(manage_transaction(&mut account, &transaction).await, Err(TransactionError::ReferencedTransactionIsNotDisputed));
+    }
+
+    #[tokio::test]
+    async fn test_process_transaction_error_transaction_id_not_unique(){
+
+        let mut accounts = HashMap::new();
+
+
+        let transaction = Transaction {
+            client: 1,
+            trans_type : TransactionType::Deposit,
+            tx: 1,
+            amount: Some(1.0),
+        };
+
+        assert_matches!(process_transaction(&mut accounts, &transaction).await, Ok(_));
+
+        let transaction_overlap_deposit = Transaction {
+            client: 2,
+            trans_type : TransactionType::Deposit,
+            tx: 1,
+            amount: Some(1.0),
+        };
+
+        assert_matches!(process_transaction(&mut accounts, &transaction_overlap_deposit).await, Err(TransactionError::ExistingTransactionId));
+
+        let transaction_overlap_withdrawal = Transaction {
+            client: 3,
+            trans_type : TransactionType::WithDrawal,
+            tx: 1,
+            amount: Some(1.0),
+        };
+
+        assert_matches!(process_transaction(&mut accounts, &transaction_overlap_withdrawal).await, Err(TransactionError::ExistingTransactionId));
     }
 }
 
