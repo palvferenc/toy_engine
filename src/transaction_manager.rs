@@ -8,6 +8,7 @@ use std::fmt::{Debug};
 
 #[derive(Serialize, Debug)]
 pub struct Account {
+    #[serde(rename = "client")]
     id: u16,
     available: f64,
     held: f64,
