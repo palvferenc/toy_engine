@@ -38,7 +38,7 @@ pub async fn process_transaction(accounts: &mut HashMap<u16, Account>, transacti
     manage_transaction(account, transaction).await
 }
 
-async fn valid_transaction_id(accounts: &mut HashMap<u16, Account>, transaction: &Transaction) -> bool {
+async fn valid_transaction_id(accounts: &HashMap<u16, Account>, transaction: &Transaction) -> bool {
     match transaction.trans_type {
         TransactionType::Deposit | TransactionType::WithDrawal => {
             for account in accounts.values() {
