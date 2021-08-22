@@ -9,9 +9,9 @@ use std::fmt::{Debug};
 #[derive(Serialize, Debug)]
 pub struct Account {
     id: u16,
-    available: f32,
-    held: f32,
-    total: f32,
+    available: f64,
+    held: f64,
+    total: f64,
     locked: bool,
     #[serde(skip)]
     transactions: HashMap< u32, (bool, Transaction)>,

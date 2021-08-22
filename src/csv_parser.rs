@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use tokio::io::AsyncRead;
 use csv_async::{AsyncReaderBuilder, Trim};
 use futures::stream::StreamExt;
@@ -16,13 +16,29 @@ pub enum TransactionType {
     ChargeBack,
 }
 
+fn custom_precision_deserialize<'de, D>(de: D) -> Result<Option<f64>, D::Error>
+    where
+        D: Deserializer<'de>,
+{
+    let dec:Option<f64> = Option::deserialize(de)?;
+
+    if let Some(dec) = dec
+    {
+        let trunc : f64 = (dec * 10000.0).trunc() / 10000.0;
+        return Ok(Some(trunc));
+    } else {
+        Ok(None)
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Transaction {
     #[serde(alias = "type")]
     pub trans_type: TransactionType,
     pub client: u16,
     pub tx: u32,
-    pub amount: Option<f32>
+    #[serde(deserialize_with = "custom_precision_deserialize")]
+    pub amount: Option<f64>
 }
 
 impl ToOwned for Transaction {

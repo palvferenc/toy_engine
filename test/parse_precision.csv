@@ -1,0 +1,4 @@
+type,           client, tx, amount
+deposit,        1,       1, 235.1234567
+deposit,        2,       2, 987654321.12345678
+dispute,        1,       1,
